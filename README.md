@@ -13,6 +13,12 @@ At the moment only Drives (HDD, SSD, NVME) are supported.
 
 !! NVME Temperature Reading hasn't been extensively Tested !!
 
+# Requirements
+This requires the following Tools to be Installed:
+- `jq`
+- `hddtemp`
+- `smartctl`
+
 # Installation
 Clone the Repository:
 ```
@@ -66,3 +72,6 @@ Set the Kernel Module to be automatically loaded at Startup:
 ```
 echo "pcspkr" > /etc/modules-load.d/beep.conf
 ```
+
+# References
+- https://www.truenas.com/community/threads/script-drive-temps.90892/

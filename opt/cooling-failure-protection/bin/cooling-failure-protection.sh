@@ -118,11 +118,16 @@ do
                  then
                     # It is an SSD
 
+                    # Define Device Path by ID AKA /dev/disk/by-id/<ata-XXXX> or /dev/disk/by-id/<nvme-XXXX>
+                    devicepathbyid="${bus}-${serial}"
+
                     # Get Temperature
-                    temp=$(hddtemp --numeric /dev/disk/by-id/${bus}-${serial})
+                    #temp=$(hddtemp --numeric /dev/disk/by-id/${bus}-${serial})
+                    #smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r
+                    temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
 
                     # Echo
-                    log_message "INFO" "SSD /dev/${kname} , /dev/disk/by-id/${bus}-${serial} , Transport = ${transport} , Temperature = ${temp}°C"
+                    log_message "INFO" "SSD /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
 
                     # Map Temperatures
                     warning_temp=${hdd_warning_temp}
@@ -131,11 +136,14 @@ do
                  then
                     # It is an NVME Drive
 
+                    # Define Device Path by ID AKA /dev/disk/by-id/<ata-XXXX> or /dev/disk/by-id/<nvme-XXXX>
+                    devicepathbyid="${transport}-${serial}"
+
                     # Get Temperature
-                    temp=$(smartctl -a /dev/disk/by-id/${transport}-${serial} | grep -E "^Temperature:" | sed -E "s|Temperature:\s*?([0-9]*?)\s*?.*?|\1|")
+                    temp=$(smartctl -a /dev/disk/by-id/${devicepathbyid} | grep -E "^Temperature:" | sed -E "s|Temperature:\s*?([0-9]*?)\s*?.*?|\1|")
 
                     # Echo
-                    log_message "INFO" "NVME /dev/${kname} , /dev/disk/by-id/${bus}-${serial} , Transport = ${transport} , Temperature = ${temp}°C"
+                    log_message "INFO" "NVME /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
 
                     # Map Temperatures
                     warning_temp=${nvme_warning_temp}
@@ -143,19 +151,25 @@ do
                  else
                     # It is Something Else
 
+                    # Define Device Path by ID AKA /dev/disk/by-id/<ata-XXXX> or /dev/disk/by-id/<nvme-XXXX>
+                    devicepathbyid="${bus}-${serial}"
+
                     # Get Temperature
-                    temp=$(hddtemp --numeric /dev/disk/by-id/${bus}-${serial})
+                    temp=$(hddtemp --numeric /dev/disk/by-id/${devicepathbyid})
 
                     # Echo
-                    log_message "INFO" "UNKNOWN /dev/${kname} , /dev/disk/by-id/${bus}-${serial} , Transport = ${transport} , Temperature = ${temp}°C"
+                    log_message "INFO" "UNKNOWN /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
 
                     # Disabled
                     warning_temp=999
                     shutdown_temp=999
                  fi
              else
+                 # Define Device Path by ID AKA /dev/disk/by-id/<ata-XXXX> or /dev/disk/by-id/<nvme-XXXX>
+                 devicepathbyid="${bus}-${serial}"
+
                  # It is an HDD
-                 log_message "INFO" "HDD /dev/${kname} , /dev/disk/by-id/${bus}-${serial} , Transport = ${transport} , Rotation = ${rotation} , Temperature = ${temp}°C"
+                 log_message "INFO" "HDD /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Rotation = ${rotation} , Temperature = ${temp}°C"
 
                  # Map Temperatures
                  warning_temp=${hdd_warning_temp}
@@ -163,7 +177,7 @@ do
              fi
 
              # Check if Temperature above the Shutdown Threshold
-             if [[ ${temp} -gt ${shutdown_temp} ]]
+             if [[ ${temp} -ge ${shutdown_temp} ]]
              then
                  # Log the Critical Event
                  log_message "CRITICAL" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} exceeded CRITICAL Temperature (Device Temperature = ${temp}°C > Shutdown Temperature = ${shutdown_temp}°C)"
@@ -175,16 +189,20 @@ do
                  # Shutdown
                  shutdown -h now
              # Check if Temperature above the Warning Threshold
-             elif [[ ${temp} -gt ${warning_temp} ]]
+             elif [[ ${temp} -ge ${warning_temp} ]]
              then
                  # Log the Warning Event
                  log_message "WARNING" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} exceeded WARNING Temperature (Device Temperature = ${temp}°C > Warning Temperature = ${warning_temp}°C)"
 
                  # Beep the Warning
                  beep -f 2500 -l 2000 -r 5 -D 1000
+             elif [ ${temp} -le ${warning_temp} ] && [ "${temp}" != "null" ]
+             then
+                 # Echo
+                 log_message "DEBUG" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} is HEALTHY (Device Temperature = ${temp}°C < Warning Temperature = ${warning_temp}°C)"
              else
                  # Echo
-                 log_message "DEBUG" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} is Healthy (Device Temperature = ${temp}°C < Warning Temperature = ${warning_temp}°C)"
+                 log_message "ERROR" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} is INVALID (Device Temperature = ${temp}°C)"
              fi
 
          else
