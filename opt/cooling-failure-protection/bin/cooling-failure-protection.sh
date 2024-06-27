@@ -109,7 +109,7 @@ do
              rotation=$(echo ${device} | jq -r '.rota')
 
              # Echo
-             log_message "DEBUG" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} , Transport = ${transport} , Rotation = ${rotation} , Temperature = ${temp}°C"
+             #log_message "DEBUG" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} , Transport = ${transport} , Rotation = ${rotation} , Temperature = ${temp}°C"
 
              if [[ "${rotation}" == "false" ]]
              then
