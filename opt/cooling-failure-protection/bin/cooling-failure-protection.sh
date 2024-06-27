@@ -140,7 +140,8 @@ do
                     devicepathbyid="${transport}-${serial}"
 
                     # Get Temperature
-                    temp=$(smartctl -a /dev/disk/by-id/${devicepathbyid} | grep -E "^Temperature:" | sed -E "s|Temperature:\s*?([0-9]*?)\s*?.*?|\1|")
+                    #temp=$(smartctl -a /dev/disk/by-id/${devicepathbyid} | grep -E "^Temperature:" | sed -E "s|Temperature:\s*?([0-9]*?)\s*?.*?|\1|")
+                    temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
 
                     # Echo
                     log_message "INFO" "NVME /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
@@ -155,7 +156,8 @@ do
                     devicepathbyid="${bus}-${serial}"
 
                     # Get Temperature
-                    temp=$(hddtemp --numeric /dev/disk/by-id/${devicepathbyid})
+                    #temp=$(hddtemp --numeric /dev/disk/by-id/${devicepathbyid})
+                    temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
 
                     # Echo
                     log_message "INFO" "UNKNOWN /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
@@ -167,6 +169,9 @@ do
              else
                  # Define Device Path by ID AKA /dev/disk/by-id/<ata-XXXX> or /dev/disk/by-id/<nvme-XXXX>
                  devicepathbyid="${bus}-${serial}"
+
+                 # Get Temperature
+                 temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
 
                  # It is an HDD
                  log_message "INFO" "HDD /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Rotation = ${rotation} , Temperature = ${temp}°C"
