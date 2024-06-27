@@ -22,4 +22,4 @@ if [[ "${DEBUG_MODE}" == "yes" ]]
 fi
 
 # Run the Application Directly to Debug
-/opt/cooling-failure-protection/cooling-failure-protection.sh
+/opt/cooling-failure-protection/bin/cooling-failure-protection.sh

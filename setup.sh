@@ -6,13 +6,13 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 
 # Create Folders
 mkdir -p /etc/cooling-failure-protection
-mkdir -p /opt/cooling-failure-protection
+mkdir -p /opt/cooling-failure-protection/bin
 
 # Install App
 cp -r opt/cooling-failure-protection/* /opt/cooling-failure-protection/
 
 # Ensure Proper Permissions
-chmod 755 /opt/cooling-failure-protection/cooling-failure-protection.sh
+chmod 755 /opt/cooling-failure-protection/bin/cooling-failure-protection.sh
 
 # Install Example Settings
 cp -r etc/cooling-failure-protection/* /etc/cooling-failure-protection/

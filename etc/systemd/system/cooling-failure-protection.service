@@ -5,7 +5,7 @@ Description=Cooling Failure Protection Service
 [Service]
 Type=simple
 User=root
-ExecStart=/opt/cooling-failure-protection/cooling-failure-protection.sh
+ExecStart=/opt/cooling-failure-protection/bin/cooling-failure-protection.sh
 Restart=on-failure
 
 [Install]
