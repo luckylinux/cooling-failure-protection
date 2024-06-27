@@ -15,11 +15,11 @@ source ${toolpath}/setup.sh
 if [[ "${DEBUG_MODE}" == "yes" ]]
     then
     # Stop Systemd Service
-    systemctl stop supermicro-fan-control.service
+    systemctl stop cooling-failure-protection.service
 
     # Status Systemd Service
-    systemctl status supermicro-fan-control.service
+    systemctl status cooling-failure-protection.service
 fi
 
 # Run the Application Directly to Debug
-/opt/supermicro-fan-control/bin/supermicro-fan-control.py
+/opt/cooling-failure-protection/cooling-failure-protection.sh
