@@ -2,10 +2,16 @@
 Cooling Failure Protection for Servers/NAS/Desktops/etc.
 
 # Introduction
+This Tool is meant to be a (almost) last Resort to prevent permanent Damage or Severe Lifespan Reduction of your Drives.
 
+It was Developed after a Cooling Failure caused several of my HDDs to reach very high Temperatures.
+
+For a Variable Fan Speed Control for Supermicro IPMI Motherboards, please refer to my [Supermicro Fan Controller](https://github.com/luckylinux/supermicro-fan-control) Repository.
 
 # Features
+At the moment only Drives (HDD, SSD, NVME) are supported.
 
+!! NVME Temperature Reading hasn't been extensively Tested !!
 
 # Installation
 Clone the Repository:
