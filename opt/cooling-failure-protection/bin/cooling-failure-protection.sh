@@ -130,8 +130,8 @@ do
                     log_message "INFO" "SSD /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
 
                     # Map Temperatures
-                    warning_temp=${hdd_warning_temp}
-                    shutdown_temp=${hdd_shutdown_temp}
+                    warning_temp=${ssd_warning_temp}
+                    shutdown_temp=${ssd_shutdown_temp}
                  elif [[ "${transport}" == "nvme" ]]
                  then
                     # It is an NVME Drive
@@ -167,6 +167,8 @@ do
                     shutdown_temp=999
                  fi
              else
+                 # It is an HDD
+
                  # Define Device Path by ID AKA /dev/disk/by-id/<ata-XXXX> or /dev/disk/by-id/<nvme-XXXX>
                  devicepathbyid="${bus}-${serial}"
 
