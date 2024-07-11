@@ -16,7 +16,6 @@ At the moment only Drives (HDD, SSD, NVME) are supported.
 # Requirements
 This requires the following Tools to be Installed:
 - `jq`
-- `hddtemp`
 - `smartctl`
 
 # Installation
@@ -71,6 +70,29 @@ beep -f 2500 -l 2000 -r 5 -D 1000
 Set the Kernel Module to be automatically loaded at Startup:
 ```
 echo "pcspkr" > /etc/modules-load.d/beep.conf
+```
+
+# Notes / Useful Commands
+## List Block Devices
+List Block Devices (Few Properties):
+```
+lsblk -d -o TRAN,TYPE,UUID,WWN,ROTA,PATH,NAME,MODEL,KNAME,LABEL,HOTPLUG,GROUP --json | jq -r
+```
+
+List Block Devices (More Properties):
+```
+lsblk -d -o TRAN,TYPE,UUID,WWN,ROTA,PATH,NAME,MODEL,KNAME,LABEL,HOTPLUG,GROUP,DISK-SEQ,HCTL,MQ,PARTLABEL,PKNAME,PTUUID,REV,RM,SCHED,SUBSYSTEMS,UUID,VENDOR,ZONED --json | jq -r
+```
+
+## Walking the `/sys/devices` Tree
+General Principle:
+```
+grep -ri <property> /sys/devices/
+```
+
+For instance in the case on a SATA SSD
+```
+grep -ri <property> /sys/devices/pci0000:00/0000:00:1f.2/ata1/host0/target0:0:0/0:0:0:0/
 ```
 
 # References

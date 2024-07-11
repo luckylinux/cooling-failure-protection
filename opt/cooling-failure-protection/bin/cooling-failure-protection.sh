@@ -72,13 +72,6 @@ get_udev_device_serial() {
 # Print Configuration
 print_config
 
-# Development
-#lsblk -d -o TRAN,TYPE,UUID,WWN,ROTA,PATH,NAME,MODEL,KNAME,LABEL,HOTPLUG,GROUP --json | jq -r
-#lsblk -d -o TRAN,TYPE,UUID,WWN,ROTA,PATH,NAME,MODEL,KNAME,LABEL,HOTPLUG,GROUP,DISK-SEQ,HCTL,MQ,PARTLABEL,PKNAME,PTUUID,REV,RM,SCHED,SUBSYSTEMS,UUID,VENDOR,ZONED --json | jq -r
-# grep -ri <propert> /sys/devices/
-# For instance in the case on a SATA SSD
-# grep -ri <property> /sys/devices/pci0000:00/0000:00:1f.2/ata1/host0/target0:0:0/0:0:0:0/
-
 # Infinite Loop
 while true
 do
@@ -125,8 +118,6 @@ do
                     devicepathbyid="${bus}-${serial}"
 
                     # Get Temperature
-                    #temp=$(hddtemp --numeric /dev/disk/by-id/${bus}-${serial})
-                    #smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r
                     temp=$(smartctl -a --json "/dev/disk/by-id/${devicepathbyid}" | jq -r '.temperature.current')
 
                     # Echo
@@ -143,7 +134,6 @@ do
                     devicepathbyid="${transport}-${serial}"
 
                     # Get Temperature
-                    #temp=$(smartctl -a /dev/disk/by-id/${devicepathbyid} | grep -E "^Temperature:" | sed -E "s|Temperature:\s*?([0-9]*?)\s*?.*?|\1|")
                     temp=$(smartctl -a --json "/dev/disk/by-id/${devicepathbyid}" | jq -r '.temperature.current')
 
                     # Echo
@@ -159,7 +149,6 @@ do
                     devicepathbyid="${bus}-${serial}"
 
                     # Get Temperature
-                    #temp=$(hddtemp --numeric /dev/disk/by-id/${devicepathbyid})
                     temp=$(smartctl -a --json "/dev/disk/by-id/${devicepathbyid}" | jq -r '.temperature.current')
 
                     # Echo
