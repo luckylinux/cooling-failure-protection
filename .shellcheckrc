@@ -1,0 +1,3 @@
+# Follow arbitrary File Paths in source Statements
+external-sources=true
+

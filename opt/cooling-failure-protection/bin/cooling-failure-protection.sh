@@ -17,8 +17,8 @@ fi
 
 # Log
 log_message() {
-    local llevel=${1}
-    local lmessage=${2}
+    local llevel="${1}"
+    local lmessage="${2}"
 
     echo "[${llevel}] ${lmessage}"
 }
@@ -40,13 +40,14 @@ print_config() {
 
 # Lookup UDEV Device
 get_udev_device_property() {
-    local lkname=${1}
-    local lproperty=${2}
+    local lkname="${1}"
+    local lproperty="${2}"
 
     if [[ -e "/dev/${lkname}" ]]
     then
-        local lvalue=$(udevadm info /dev/${lkname} | grep ${lproperty}= | sed -E "s|.*?${lproperty}=(.*?)\$|\1|")
-        echo ${lvalue}
+        local lvalue
+        lvalue=$(udevadm info "/dev/${lkname}" | grep "${lproperty}=" | sed -E "s|.*?${lproperty}=(.*?)\$|\1|")
+        echo "${lvalue}"
     else
         log_message "ERROR" "Device /dev/${lkname} does NOT Exist."
     fi
@@ -54,16 +55,18 @@ get_udev_device_property() {
 
 get_udev_device_bus() {
     local lkname="${1}"
-    local lbus=$(get_udev_device_property ${lkname} "ID_BUS")
+    local lbus
+    lbus=$(get_udev_device_property "${lkname}" "ID_BUS")
 
-    echo ${lbus}
+    echo "${lbus}"
 }
 
 get_udev_device_serial() {
     local lkname="${1}"
-    local lserial=$(get_udev_device_property ${lkname} "ID_SERIAL")
+    local lserial
+    lserial=$(get_udev_device_property "${lkname}" "ID_SERIAL")
 
-    echo ${lserial}
+    echo "${lserial}"
 }
 
 # Print Configuration
@@ -80,18 +83,18 @@ print_config
 while true
 do
     # Loop over Drives
-    lsblk -d -o MODEL,WWN,SIZE,STATE,TYPE,ROTA,KNAME,HCTL,TRAN,VENDOR --json | jq -c '.blockdevices[]' | while read device; do
+    lsblk -d -o MODEL,WWN,SIZE,STATE,TYPE,ROTA,KNAME,HCTL,TRAN,VENDOR --json | jq -c '.blockdevices[]' | while read -r device; do
          # Get Device Kernel Name (e.g. "sda")
-         kname=$(echo ${device} | jq -r '.kname')
+         kname=$(echo "${device}" | jq -r '.kname')
 
          # Get Transport (e.g. "ata", "usb", "scsi", ...)
-         transport=$(echo ${device} | jq -r '.tran')
+         transport=$(echo "${device}" | jq -r '.tran')
 
          # Get Model
-         model=$(echo ${device} | jq -r '.model')
+         model=$(echo "${device}" | jq -r '.model')
 
          # Get WWN
-         wwn=$(echo ${device} | jq -r '.wwn')
+         wwn=$(echo "${device}" | jq -r '.wwn')
 
          # Declare Temperature
          temp=999
@@ -100,13 +103,13 @@ do
          if [ "${model}" != "null" ] && [ "${wwn}" != "null" ]
          then
              # Get BUS based on UDEV
-             bus=$(get_udev_device_bus ${kname})
+             bus=$(get_udev_device_bus "${kname}")
 
              # Get Serial
-             serial=$(get_udev_device_serial ${kname})
+             serial=$(get_udev_device_serial "${kname}")
 
              # Get Rotation
-             rotation=$(echo ${device} | jq -r '.rota')
+             rotation=$(echo "${device}" | jq -r '.rota')
 
              # Echo
              #log_message "DEBUG" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} , Transport = ${transport} , Rotation = ${rotation} , Temperature = ${temp}°C"
@@ -124,7 +127,7 @@ do
                     # Get Temperature
                     #temp=$(hddtemp --numeric /dev/disk/by-id/${bus}-${serial})
                     #smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r
-                    temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
+                    temp=$(smartctl -a --json "/dev/disk/by-id/${devicepathbyid}" | jq -r '.temperature.current')
 
                     # Echo
                     log_message "INFO" "SSD /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
@@ -141,7 +144,7 @@ do
 
                     # Get Temperature
                     #temp=$(smartctl -a /dev/disk/by-id/${devicepathbyid} | grep -E "^Temperature:" | sed -E "s|Temperature:\s*?([0-9]*?)\s*?.*?|\1|")
-                    temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
+                    temp=$(smartctl -a --json "/dev/disk/by-id/${devicepathbyid}" | jq -r '.temperature.current')
 
                     # Echo
                     log_message "INFO" "NVME /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
@@ -157,7 +160,7 @@ do
 
                     # Get Temperature
                     #temp=$(hddtemp --numeric /dev/disk/by-id/${devicepathbyid})
-                    temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
+                    temp=$(smartctl -a --json "/dev/disk/by-id/${devicepathbyid}" | jq -r '.temperature.current')
 
                     # Echo
                     log_message "INFO" "UNKNOWN /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Temperature = ${temp}°C"
@@ -173,7 +176,7 @@ do
                  devicepathbyid="${bus}-${serial}"
 
                  # Get Temperature
-                 temp=$(smartctl -a --json /dev/disk/by-id/${devicepathbyid} | jq -r '.temperature.current')
+                 temp=$(smartctl -a --json "/dev/disk/by-id/${devicepathbyid}" | jq -r '.temperature.current')
 
                  # It is an HDD
                  log_message "INFO" "HDD /dev/${kname} , /dev/disk/by-id/${devicepathbyid} , Transport = ${transport} , Rotation = ${rotation} , Temperature = ${temp}°C"
@@ -184,7 +187,7 @@ do
              fi
 
              # Check if Temperature above the Shutdown Threshold
-             if [[ ${temp} -ge ${shutdown_temp} ]]
+             if [[ "${temp}" -ge "${shutdown_temp}" ]]
              then
                  # Log the Critical Event
                  log_message "CRITICAL" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} exceeded CRITICAL Temperature (Device Temperature = ${temp}°C > Shutdown Temperature = ${shutdown_temp}°C)"
@@ -196,14 +199,14 @@ do
                  # Shutdown
                  shutdown -h now
              # Check if Temperature above the Warning Threshold
-             elif [[ ${temp} -ge ${warning_temp} ]]
+             elif [[ "${temp}" -ge "${warning_temp}" ]]
              then
                  # Log the Warning Event
                  log_message "WARNING" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} exceeded WARNING Temperature (Device Temperature = ${temp}°C > Warning Temperature = ${warning_temp}°C)"
 
                  # Beep the Warning
                  beep -f 2500 -l 2000 -r 5 -D 1000
-             elif [ ${temp} -le ${warning_temp} ] && [ "${temp}" != "null" ]
+             elif [ "${temp}" -le "${warning_temp}" ] && [ "${temp}" != "null" ]
              then
                  # Echo
                  log_message "DEBUG" "Device /dev/${kname} , /dev/disk/by-id/${bus}-${serial} is HEALTHY (Device Temperature = ${temp}°C < Warning Temperature = ${warning_temp}°C)"
